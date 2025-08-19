@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import uuid
 from copy import deepcopy
 
 from typing import Optional, Literal, Union, overload
@@ -193,6 +194,8 @@ class ScriptFile:
 
         self.imported_materials = {}
         self.imported_tracks = []
+        self.res_uuid_start = '##_draftpath_placeholder_0E685133-18CE-45ED-8CB8-2904A212EC80_##'
+        self.res_uuid_path = str(uuid.uuid4())
 
         with open(assets.get_asset_path('DRAFT_CONTENT_TEMPLATE'), "r", encoding="utf-8") as f:
             self.content = json.load(f)
@@ -295,6 +298,38 @@ class ScriptFile:
             `TypeError`: 片段类型不匹配轨道类型
             `SegmentOverlap`: 新片段与已有片段重叠
         """
+        import platform
+        import os
+        import shutil
+
+        # 检测是否为mac系统
+        if platform.system() == "Darwin":
+            # 获取草稿目录路径
+            if self.save_path is not None:
+                draft_dir = os.path.dirname(self.save_path)
+                res_dir = os.path.join(draft_dir, self.res_uuid_path)
+
+                # 创建资源目录
+                os.makedirs(res_dir, exist_ok=True)
+
+                # 处理各种片段的素材文件复制
+                if hasattr(segment, 'material_instance') and hasattr(segment.material_instance, 'path'):
+                    material_path = segment.material_instance.path
+                    if material_path and os.path.isfile(material_path):
+                        # 获取文件名
+                        filename = os.path.basename(material_path)
+                        # 生成新的文件路径
+                        new_filename = os.path.join(self.res_uuid_start,os.path.join(self.res_uuid_path,filename))
+                        new_file_path = os.path.join(res_dir, filename)
+
+                        try:
+                            # 复制文件到资源目录
+                            shutil.copy2(material_path, new_file_path)
+                            # 更新material_instance的path为新路径
+                            segment.material_instance.path = new_filename
+                        except Exception as e:
+                            print(f"警告：无法复制文件 {material_path} 到资源目录：{e}")
+
         target = self._get_track(type(segment), track_name)
 
         # 加入轨道并更新时长
