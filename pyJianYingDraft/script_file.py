@@ -302,33 +302,30 @@ class ScriptFile:
         import os
         import shutil
 
-        # 检测是否为mac系统
-        if platform.system() == "Darwin":
-            # 获取草稿目录路径
-            if self.save_path is not None:
-                draft_dir = os.path.dirname(self.save_path)
-                res_dir = os.path.join(draft_dir, self.res_uuid_path)
+        if self.save_path is not None:
+            draft_dir = os.path.dirname(self.save_path)
+            res_dir = os.path.join(draft_dir, self.res_uuid_path)
 
-                # 创建资源目录
-                os.makedirs(res_dir, exist_ok=True)
+            # 创建资源目录
+            os.makedirs(res_dir, exist_ok=True)
 
-                # 处理各种片段的素材文件复制
-                if hasattr(segment, 'material_instance') and hasattr(segment.material_instance, 'path'):
-                    material_path = segment.material_instance.path
-                    if material_path and os.path.isfile(material_path):
-                        # 获取文件名
-                        filename = os.path.basename(material_path)
-                        # 生成新的文件路径
-                        new_filename = os.path.join(self.res_uuid_start,os.path.join(self.res_uuid_path,filename))
-                        new_file_path = os.path.join(res_dir, filename)
+            # 处理各种片段的素材文件复制
+            if hasattr(segment, 'material_instance') and hasattr(segment.material_instance, 'path'):
+                material_path = segment.material_instance.path
+                if material_path and os.path.isfile(material_path):
+                    # 获取文件名
+                    filename = os.path.basename(material_path)
+                    # 生成新的文件路径
+                    new_filename = os.path.join(self.res_uuid_start,os.path.join(self.res_uuid_path,filename))
+                    new_file_path = os.path.join(res_dir, filename)
 
-                        try:
-                            # 复制文件到资源目录
-                            shutil.copy2(material_path, new_file_path)
-                            # 更新material_instance的path为新路径
-                            segment.material_instance.path = new_filename
-                        except Exception as e:
-                            print(f"警告：无法复制文件 {material_path} 到资源目录：{e}")
+                    try:
+                        # 复制文件到资源目录
+                        shutil.copy2(material_path, new_file_path)
+                        # 更新material_instance的path为新路径
+                        segment.material_instance.path = new_filename
+                    except Exception as e:
+                        print(f"警告：无法复制文件 {material_path} 到资源目录：{e}")
 
         target = self._get_track(type(segment), track_name)
 
