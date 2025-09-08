@@ -92,7 +92,7 @@ class VideoMaterial:
             raise ValueError(f"不支持的视频素材类型 '{postfix}'")
 
         info: pymediainfo.MediaInfo = \
-            pymediainfo.MediaInfo.parse(path, mediainfo_options={"File_TestContinuousFileNames": "0"})  # type: ignore
+            pymediainfo.MediaInfo.parse(path, mediainfo_options={"File_TestContinuousFileNames": "0"},encoding_errors="ignore")  # type: ignore
         # 有视频轨道的视为视频素材
         if len(info.video_tracks):
             self.material_type = "video"
@@ -170,7 +170,7 @@ class AudioMaterial:
 
         if not pymediainfo.MediaInfo.can_parse():
             raise ValueError("不支持的音频素材类型 %s" % os.path.splitext(path)[1])
-        info: pymediainfo.MediaInfo = pymediainfo.MediaInfo.parse(path)  # type: ignore
+        info: pymediainfo.MediaInfo = pymediainfo.MediaInfo.parse(path,encoding_errors="ignore")  # type: ignore
         if len(info.video_tracks):
             raise ValueError("音频素材不应包含视频轨道")
         if not len(info.audio_tracks):
